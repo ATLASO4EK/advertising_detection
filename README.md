@@ -1,2 +1,3 @@
-# advertising_detection
-This repo will win bmm!!!!!!!!!!!!
+# Advertising Detection / Детекция Рекламы
+
+ЭТО МЕЙН ВЕТКА, ПОДУМОЙ ПЕРЕД КОММИТОМ!!!!!!
