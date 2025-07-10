@@ -177,6 +177,31 @@ async def analyze():
         return jsonify({"error": "Fake or invalid image"}), 400
     '''
 
+# Создаем тикет
+@app.route('/ticket', methods=['POST'])
+async def ticket():
+    """
+    Создает тикет на очистку места от граффити или рекламы (сохранение в БД)
+    """
+    # id, create_time, user_id, user_photo, user_lat, user_lon, user_time, notFake
+
+    try:
+        file = request.files['image']
+        img = Image.open(file.stream)
+    except (TypeError, ValueError):
+        return jsonify({'error': "Invalid or missing image"}), 400
+
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+        create_time = int(request.args.get('lon'))
+        user_id = int(request.args.get('lon'))
+        user_time = int(request.args.get('lon'))
+        notFake = bool(request.args.get('lon'))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid or missing parameters"}), 400
+
+
 
 app.run(debug=True)
 
