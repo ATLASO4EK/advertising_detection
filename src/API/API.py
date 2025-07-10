@@ -16,13 +16,16 @@ from math import sqrt
 
 
 app = Flask(__name__)   # Создаем API
-model = YOLO('src/API/YOLO.pt')     #з Загружаем дообученную YOLO для детекции граффити и рекламы
+YOLO_model = YOLO('src/API/YOLO.pt')     # Загружаем дообученную YOLO для детекции граффити и рекламы
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+wt = torchvision.models.ViT_H_14_Weights.DEFAULT
+model = vit_h_14(weights=wt)
+
 
 # Проверка подлинности фото
 def cosine_similarity(img1, img2):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    wt = torchvision.models.ViT_H_14_Weights.DEFAULT
-    model = vit_h_14(weights=wt)
+    global model
     model.heads = nn.Sequential(*list(model.heads.children())[:-1])
     model = model.to(device)
     img1 = process_test_image(img1, device)
@@ -100,7 +103,7 @@ def get_boxes():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    results = model.predict([img])
+    results = YOLO_model.predict([img])
     response = {}
     for result in results:
         boxes = result.boxes  # Boxes object for bounding box outputs
@@ -143,12 +146,12 @@ async def analyze():
         closest_obj_photo = Image.open(io.BytesIO(base64.b64decode(closest_obj.to_dict()['photo'].encode())))
 
     if closest_obj:
-        similarity = cosine_similarity(closest_obj_photo, img)
+        similarity = cosine_similarity(closest_obj_photo, img)[0]
     else:
         similarity = 1.0
 
     if similarity >= 0.5:
-        results = model.predict([img])
+        results = YOLO_model.predict([img])
         response = {}
         for result in results:
             boxes = result.boxes  # Boxes object for bounding box outputs
@@ -159,7 +162,7 @@ async def analyze():
                         "predictions":response}), 200
     # Костыль, тк малая БД
     else:
-        results = model.predict([img])
+        results = YOLO_model.predict([img])
         response = {}
         for result in results:
             boxes = result.boxes  # Boxes object for bounding box outputs
