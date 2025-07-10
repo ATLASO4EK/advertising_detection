@@ -5,7 +5,7 @@ from db import Session, CityObject
 import asyncio
 import base64
 import io
-
+from ticket import add_ticket_object
 import numpy as np
 import torch
 import torchvision
@@ -158,7 +158,7 @@ async def analyze():
             for i in range(len(boxes.cls)):
                 response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
 
-        return jsonify({"inDB":True,
+        return jsonify({"notFake":True,
                         "predictions":response}), 200
     # Костыль, тк малая БД
     else:
@@ -169,7 +169,7 @@ async def analyze():
             for i in range(len(boxes.cls)):
                 response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
 
-        return jsonify({"inDB": False,
+        return jsonify({"notFake": False,
                         "predictions": response}), 200
     # Как должно быть
     '''
@@ -201,6 +201,14 @@ async def ticket():
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid or missing parameters"}), 400
 
+    add_ticket_object(create_time=create_time,
+                      user_lat=lat,user_lon=lon,
+                      user_id=user_id,
+                      user_time=user_time,
+                      not_fake=notFake,
+                      user_photo=img)
+
+    return 200
 
 
 app.run(debug=True)

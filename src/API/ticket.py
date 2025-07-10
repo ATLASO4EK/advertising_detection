@@ -6,7 +6,7 @@ Base = declarative_base()
 
 class TicketObject(Base):
     __tablename__ = 'ticket_objects'
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     create_time = Column(DateTime, nullable=False)
     user_id = Column(String, nullable=False)
     user_photo = Column(String, nullable=False)
@@ -47,9 +47,9 @@ def create_db():
     Base.metadata.create_all(engine)
 
 
-def add_ticket_object(id, create_time, user_id, user_photo, user_lat, user_lon, user_time, not_fake):
+def add_ticket_object(create_time, user_id, user_photo, user_lat, user_lon, user_time, not_fake):
     session = Session()
-    obj = TicketObject(id=id, create_time=create_time, user_id=user_id, user_photo=user_photo, user_lat=user_lat, user_lon=user_lon, user_time=user_time, not_fake=not_fake)
+    obj = TicketObject(create_time=create_time, user_id=user_id, user_photo=user_photo, user_lat=user_lat, user_lon=user_lon, user_time=user_time, not_fake=not_fake)
     session.add(obj)
     session.commit()
     session.close()

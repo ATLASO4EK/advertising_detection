@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from config import ALLOWED_USERS
-
+from datetime import datetime
 from states import *
 from keyboards import *
 from api import *
@@ -59,8 +59,22 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         data = await state.get_data()
         lat = data.get('lat')
         lon = data.get('lon')
-        send_photo_to_api(user_id, file_bytes, lat, lon)
-        await message.answer('Ваша пометка отправлена! Благодарим, что заботитесь о чистоте нашего города!\n Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
+        response = send_photo_to_api(user_id, file_bytes, lat, lon)
+        print(response)
+        if response['predictions'] != {}:
+            post_ticket(create_time=0,
+                        user_time=0,
+                        user_id=user_id,
+                        lat=lat,
+                        lon=lon,
+                        photo_bytes=file_bytes,
+                        notFake=response['notFake'])
+            await message.answer('Запрос на очистку создан! '
+                                 'Благодарим, что заботитесь о чистоте нашего города!\n '
+                                 'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
+        else:
+            await message.answer('К сожалению, система не распознала граффити или рекламу здесь =(\n'
+                             'Вы можете попытаться отправить фото ещё раз или отправить другой объект', reply_markup=get_photo_keyboard())
         # После отправки фото возвращаемся в MAIN
         await state.set_state(MainMenuStates.MAIN)
         await state.update_data(lat=None, lon=None)
