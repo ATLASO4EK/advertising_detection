@@ -1,18 +1,51 @@
-import io
 from flask import Flask, request, jsonify
 from ultralytics import YOLO
-import base64
 from PIL import Image
-import os
 from db import Session, CityObject
 import asyncio
+import base64
+import io
 
-
-app = Flask(__name__)
-model = YOLO('src/API/YOLO.pt')
-
+import numpy as np
+import torch
+import torchvision
+from torch import nn
+from torchvision import transforms as tr
+from torchvision.models import vit_h_14
 from math import sqrt
 
+
+app = Flask(__name__)   # Создаем API
+model = YOLO('src/API/YOLO.pt')     #з Загружаем дообученную YOLO для детекции граффити и рекламы
+
+# Проверка подлинности фото
+def cosine_similarity(img1, img2):
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    wt = torchvision.models.ViT_H_14_Weights.DEFAULT
+    model = vit_h_14(weights=wt)
+    model.heads = nn.Sequential(*list(model.heads.children())[:-1])
+    model = model.to(device)
+    img1 = process_test_image(img1, device)
+    img2 = process_test_image(img2, device)
+    emb_one = model(img1).detach().cpu()
+    emb_two = model(img2).detach().cpu()
+    scores = torch.nn.functional.cosine_similarity(emb_one, emb_two)
+    return scores.numpy().tolist()
+
+# Подготавливаем изображение к проверке на подлинность
+def process_test_image(img, device):
+    transformations = tr.Compose([tr.ToTensor(),
+                                  tr.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+                                  tr.Resize((518, 518))])
+    img = transformations(img).float()
+    img = img.unsqueeze_(0)
+
+    img = img.to(device)
+
+    return img
+
+
+# Ищем ближайший объект по евклидову расстоянию
 def find_closest_object(db_session, lat: float, lon: float):
     """
     Находит ближайший объект в базе данных к заданным координатам.
@@ -39,7 +72,7 @@ def find_closest_object(db_session, lat: float, lon: float):
 
     return closest
 
-
+# Сравниваем с объектами в бд
 @app.route('/get_object', methods=['GET'])
 async def get_object_by_geo():
     try:
@@ -55,17 +88,9 @@ async def get_object_by_geo():
 
     return jsonify(closest_obj.to_dict())
 
-@app.route('/')
-def hello_world():
-  return 'Hello, World!'
-
-@app.route('/abduz/<name>')
-def he_world(name):
-  return f'Hello, World! {name}'
-
+# Получение только class:bb
 @app.route('/get_boxes', methods=['GET'])
 def get_boxes():
-    #return io.BytesIO(base64.urlsafe_b64decode(img))
     if 'image' not in request.files:
         return jsonify({'error': 'No image part in the request'}), 400
 
@@ -84,4 +109,71 @@ def get_boxes():
 
     return response
 
+# Общий анализ фото
+@app.route('/analyze', methods=['GET'])
+async def analyze():
+    '''
+    Анализирует изображение на наличие рекламы или граффити,
+    проводя проверки на фрод, и с учетом геолокации
+
+    Для запроса
+    в качестве файла необходимо передать open('img, 'rb'),
+    в качестве параметров lat и lon - географические координаты фотографии (PIL Image)
+    :return:    dict{int(class):list(xywh of bounding box)}
+    '''
+
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image part in the request'}), 400
+    try:
+        file = request.files['image']
+        img = Image.open(file.stream)
+    except (TypeError, ValueError):
+        return jsonify({'error': "Invalid or missing image"}), 400
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid or missing coordinates"}), 400
+
+    closest_obj = await asyncio.to_thread(find_closest_object, Session(), lat, lon)
+
+    if not closest_obj:
+        closest_obj = None
+    else:
+        closest_obj_photo = Image.open(io.BytesIO(base64.b64decode(closest_obj.to_dict()['photo'].encode())))
+
+    if closest_obj:
+        similarity = cosine_similarity(closest_obj_photo, img)
+    else:
+        similarity = 1.0
+
+    if similarity >= 0.5:
+        results = model.predict([img])
+        response = {}
+        for result in results:
+            boxes = result.boxes  # Boxes object for bounding box outputs
+            for i in range(len(boxes.cls)):
+                response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
+
+        return jsonify({"inDB":True,
+                        "predictions":response}), 200
+    # Костыль, тк малая БД
+    else:
+        results = model.predict([img])
+        response = {}
+        for result in results:
+            boxes = result.boxes  # Boxes object for bounding box outputs
+            for i in range(len(boxes.cls)):
+                response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
+
+        return jsonify({"inDB": False,
+                        "predictions": response}), 200
+    # Как должно быть
+    '''
+    else:
+        return jsonify({"error": "Fake or invalid image"}), 400
+    '''
+
+
 app.run(debug=True)
+

@@ -31,7 +31,7 @@ class CityObject(Base):
 
 
 # Database setup
-engine = create_engine('sqlite:///data/city_objects.db')
+engine = create_engine('sqlite:///src/API/data/city_objects.db')
 Session = sessionmaker(bind=engine)
 
 
