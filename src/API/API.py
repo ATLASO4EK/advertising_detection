@@ -109,10 +109,10 @@ def get_boxes():
             response.update({int(boxes.cls[i].item()):list(boxes.xywh[i].tolist())})
 
     if response != {}:
-        return jsonify({'status':'Ok.',
+        return jsonify({'status':True,
                         'response':response}), 200
     else:
-        return jsonify({'status':'No objects detected',
+        return jsonify({'status':False,
                         'response':{}}), 200
 
 # Верификация фото
@@ -204,26 +204,30 @@ async def ticket():
 
     try:
         file = request.files['image']
-        img = Image.open(file.stream)
-    except (TypeError, ValueError):
-        return jsonify({'error': "Invalid or missing image"}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
     try:
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
         create_time = datetime.now()
         user_id = int(request.args.get('user_id'))
-        user_time = int(request.args.get('user_time'))
-        notFake = bool(request.args.get('notFake'))
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid or missing parameters"}), 400
+        format_string = "%Y-%m-%d %H:%M:%S.%f"
+        time_str = request.args.get('user_time')
+        user_time = datetime.strptime(time_str, format_string)
+        notFake = int(bool(request.args.get('notFake')))
+    except Exception as e:
+        return jsonify({"context": "Invalid or missing parameters", "error":e}), 400
+
+    # Кодируем в base64 и декодируем в обычную строку
+    img_str = base64.b64encode(file.read()).decode("utf-8")
 
     add_ticket_object(create_time=create_time,
                       user_lat=lat,user_lon=lon,
                       user_id=user_id,
                       user_time=user_time,
                       not_fake=notFake,
-                      user_photo=img)
+                      user_photo=img_str)
 
     return jsonify({'status':'Ok.'}), 200
 
