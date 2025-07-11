@@ -15,18 +15,13 @@ from torchvision.models import vit_h_14
 from math import sqrt
 from datetime import datetime
 
-
 app = Flask(__name__)   # Создаем API
-YOLO_model = YOLO('src/API/YOLO.pt')     # Загружаем дообученную YOLO для детекции граффити и рекламы
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-wt = torchvision.models.ViT_H_14_Weights.DEFAULT
-model = vit_h_14(weights=wt)
-
 
 # Проверка подлинности фото
 def cosine_similarity(img1, img2):
-    global model
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    wt = torchvision.models.ViT_H_14_Weights.DEFAULT
+    model = vit_h_14(weights=wt)
     model.heads = nn.Sequential(*list(model.heads.children())[:-1])
     model = model.to(device)
     img1 = process_test_image(img1, device)
@@ -98,6 +93,8 @@ def get_boxes():
     if 'image' not in request.files:
         return jsonify({'error': 'No image part in the request'}), 400
 
+    YOLO_model = YOLO('src/API/YOLO.pt')  # Загружаем дообученную YOLO для детекции граффити и рекламы
+
     try:
         file = request.files['image']
         img = Image.open(file.stream)
@@ -139,6 +136,8 @@ async def analyze():
 
     if 'image' not in request.files:
         return jsonify({'error': 'No image part in the request'}), 400
+
+    YOLO_model = YOLO('src/API/YOLO.pt')  # Загружаем дообученную YOLO для детекции граффити и рекламы
     try:
         file = request.files['image']
         img = Image.open(file.stream)
