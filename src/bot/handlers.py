@@ -61,14 +61,12 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         lon = data.get('lon')
         response = send_photo_to_api(user_id, file_bytes, lat, lon)
         print(response)
-        if response['predictions'] != {}:
-            post_ticket(create_time=0,
-                        user_time=0,
-                        user_id=user_id,
+        if response['status'] != 'No objects detected':
+            post_ticket(user_id=user_id,
                         lat=lat,
                         lon=lon,
                         photo_bytes=file_bytes,
-                        notFake=response['notFake'])
+                        notFake=None)
             await message.answer('Запрос на очистку создан! '
                                  'Благодарим, что заботитесь о чистоте нашего города!\n '
                                  'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())

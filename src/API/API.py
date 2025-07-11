@@ -13,6 +13,7 @@ from torch import nn
 from torchvision import transforms as tr
 from torchvision.models import vit_h_14
 from math import sqrt
+from datetime import datetime
 
 
 app = Flask(__name__)   # Создаем API
@@ -110,10 +111,21 @@ def get_boxes():
         for i in range(len(boxes.cls)):
             response.update({int(boxes.cls[i].item()):list(boxes.xywh[i].tolist())})
 
-    return response
+    if response != {}:
+        return jsonify({'status':'Ok.',
+                        'response':response}), 200
+    else:
+        return jsonify({'status':'No objects detected',
+                        'response':{}}), 200
 
-# Общий анализ фото
-@app.route('/analyze', methods=['GET'])
+# Верификация фото
+@app.route('/verify', methods=['GET'])
+async def verify():
+    return jsonify({'status':'Ok.',
+                    'response':{'verified':True}}), 200
+
+# Общий анализ фото (legacy)
+@app.route('/legacy/analyze', methods=['GET'])
 async def analyze():
     '''
     Анализирует изображение на наличие рекламы или граффити,
@@ -200,10 +212,10 @@ async def ticket():
     try:
         lat = float(request.args.get('lat'))
         lon = float(request.args.get('lon'))
-        create_time = int(request.args.get('lon'))
-        user_id = int(request.args.get('lon'))
-        user_time = int(request.args.get('lon'))
-        notFake = bool(request.args.get('lon'))
+        create_time = datetime.now()
+        user_id = int(request.args.get('user_id'))
+        user_time = int(request.args.get('user_time'))
+        notFake = bool(request.args.get('notFake'))
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid or missing parameters"}), 400
 
