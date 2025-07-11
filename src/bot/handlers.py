@@ -7,6 +7,7 @@ from states import *
 from keyboards import *
 from api import *
 from bot import *
+import base64
 
 # Декоратор для проверки user_id в ALLOWED_USERS
 from functools import wraps
@@ -60,13 +61,14 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         lat = data.get('lat')
         lon = data.get('lon')
         response = send_photo_to_api(user_id, file_bytes, lat, lon)
-        print(response)
-        if response['status'] != 'No objects detected':
+        if response['status']:
+            print(file_bytes)
             post_ticket(user_id=user_id,
                         lat=lat,
                         lon=lon,
                         photo_bytes=file_bytes,
                         notFake=None)
+
             await message.answer('Запрос на очистку создан! '
                                  'Благодарим, что заботитесь о чистоте нашего города!\n '
                                  'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
