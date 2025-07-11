@@ -142,13 +142,16 @@ async def analyze():
 
     if not closest_obj:
         closest_obj = None
+        inDBobj = False
     else:
         closest_obj_photo = Image.open(io.BytesIO(base64.b64decode(closest_obj.to_dict()['photo'].encode())))
 
     if closest_obj:
         similarity = cosine_similarity(closest_obj_photo, img)[0]
+        inDBobj = True
     else:
         similarity = 1.0
+        inDBobj = True
 
     if similarity >= 0.5:
         results = YOLO_model.predict([img])
@@ -158,8 +161,7 @@ async def analyze():
             for i in range(len(boxes.cls)):
                 response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
 
-        return jsonify({"notFake":True,
-                        "predictions":response}), 200
+        notFake=True
     # Костыль, тк малая БД
     else:
         results = YOLO_model.predict([img])
@@ -169,8 +171,12 @@ async def analyze():
             for i in range(len(boxes.cls)):
                 response.update({int(boxes.cls[i].item()): list(boxes.xywh[i].tolist())})
 
-        return jsonify({"notFake": False,
-                        "predictions": response}), 200
+        notFake=False
+
+    return jsonify({"notFake": notFake,
+                    "similarity":similarity,
+                    "geo_similarity":inDBobj,
+                    "predictions": response}), 200
     # Как должно быть
     '''
     else:
@@ -208,7 +214,7 @@ async def ticket():
                       not_fake=notFake,
                       user_photo=img)
 
-    return 200
+    return jsonify({'status':'Ok.'}), 200
 
 
 app.run(debug=True)

@@ -49,7 +49,13 @@ def create_db():
 
 def add_ticket_object(create_time, user_id, user_photo, user_lat, user_lon, user_time, not_fake):
     session = Session()
-    obj = TicketObject(create_time=create_time, user_id=user_id, user_photo=user_photo, user_lat=user_lat, user_lon=user_lon, user_time=user_time, not_fake=not_fake)
+    obj = TicketObject(create_time=create_time,
+                       user_id=user_id,
+                       user_photo=user_photo,
+                       user_lat=user_lat,
+                       user_lon=user_lon,
+                       user_time=user_time,
+                       not_fake=not_fake)
     session.add(obj)
     session.commit()
     session.close()
