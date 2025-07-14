@@ -3,7 +3,7 @@ import requests
 
 def send_photo_to_api(user_id, photo_bytes, lat=None, lon=None):
     # Отправка фото и координат на локальный сервер
-    url = 'http://127.0.0.1:5000/get_boxes'
+    url = 'http://127.0.0.1:5000/get_pred_qwen'
     files = {'image':photo_bytes}
     try:
         response = requests.get(url, files=files, timeout=60)

@@ -14,8 +14,108 @@ from torchvision import transforms as tr
 from torchvision.models import vit_h_14
 from math import sqrt
 from datetime import datetime
+import requests
+import json
 
 app = Flask(__name__)   # Создаем API
+
+
+import requests
+import json
+import base64
+
+class Message:
+    def __init__(self, message=None):
+        if message is None:
+            message = {}
+        self.message = message
+
+    def add_prompt(self, prompt: str):
+        self.message = {"role": "user", "content": prompt}
+
+    def add_image(self, base64_image, prompt=None):
+        content = []
+        if prompt is not None:
+            content.append(self.get_text_content(prompt))
+        content.append(self.get_image_content(base64_image))
+        self.message = {"role": "user", "content": content}
+
+    def encode_image(image_path: str) -> str:
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode('utf-8')
+
+    @staticmethod
+    def get_text_content(text):
+        return {
+            "type": "text",
+            "text": text
+        }
+
+    @staticmethod
+    def get_image_content(base64_image):
+        image_type = 'image/jpeg'
+        return {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:{image_type};base64,{base64_image}"
+            }
+        }
+
+class History:
+    def __init__(self, messages=None):
+        if messages is None:
+            messages = []
+        self.messages = messages
+
+    def get_messages_json(self):
+        return [message.message for message in self.messages]
+
+class QWEN:
+    def __init__(self, api_key: str, prehistory: History):
+        self.prehistory = prehistory.get_messages_json()
+        self.api_key = api_key
+        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.model = "qwen/qwen-vl-plus"
+
+    def ask(self, messages: History):
+        response = requests.post(
+            url=self.api_url,
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://your-app.com",
+                "X-Title": "Design Code Checker"
+            },
+            data=json.dumps({
+                "model": self.model,
+                "messages": self.prehistory + messages.get_messages_json(),
+                "max_tokens": 4000
+            })
+        )
+        if response.status_code == 200:
+            data = response.json()
+            assistant_reply = data['choices'][0]['message']['content']
+            return assistant_reply
+        else:
+            print("Ошибка:", response.status_code, response.text)
+            return None
+
+
+def ask_model(model, prompt, base64_image):
+    message = Message()
+    message.add_image(base64_image, prompt)
+    history = History([message])
+    return model.ask(history)
+
+API_KEY = "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"
+prompt = "Проанализируй это изображение на соответствие дизайн-коду города"
+with open('src/API/start_prompt.txt', 'r') as f:
+    start_text = f.read()
+model = QWEN(API_KEY,
+    History([Message({"role": "system", "content": f"Ты - агент для определения соответствия рекламы дизайн-коду города. (Правилам и нормам). Тебе на вход подается фото объекта. На выходе - json, с ключами:\n'final answer': 'соответствует'/'не соответствует' - твой итоговый ответ\n'pre[i]': 'your_text' - обоснование для i-го пунка из дизайн кода\nВажно, что твой ответ должен быть только в формате json!\nПравила:\n{start_text}"})])
+)
+
+
 
 # Проверка подлинности фото
 def cosine_similarity(img1, img2):
@@ -70,6 +170,17 @@ def find_closest_object(db_session, lat: float, lon: float):
             closest = obj
 
     return closest
+
+@app.route('/get_pred_qwen', methods=['GET'])
+def get_pred():
+    try:
+        base64_image = request.files['image'].stream.read().decode('utf-8')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    global model, prompt
+    model_ans = ask_model(model, prompt, base64_image)
+
+    return jsonify({'response':model_ans}), 200
 
 # Сравниваем с объектами в бд
 @app.route('/get_object', methods=['GET'])
@@ -231,6 +342,15 @@ async def ticket():
 
     return jsonify({'status':'Ok.'}), 200
 
+
+@app.route('/get_pred_qwen', methods=['GET'])
+async def get_pred_qwen():
+    try:
+        file = request.files['image']
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    return jsonify({'response':1}), 200
 
 app.run(debug=True)
 

@@ -34,16 +34,6 @@ async def handle_start(message: types.Message, state: FSMContext):
         await message.answer(f'Ошибка: {e}')
         assert False, f'Ошибка в handle_start: {e}'
 
-@dp.message(F.text == 'Прислать фото')
-@whitelist_only
-async def handle_request_photo(message: types.Message, state: FSMContext):
-    try:
-        await state.set_state(MainMenuStates.WAIT_PHOTO)
-        await message.answer('Пожалуйста, пришлите изображение.')
-    except Exception as e:
-        await message.answer(f'Ошибка: {e}')
-        assert False, f'Ошибка в handle_request_photo: {e}'
-
 @dp.message(F.photo)
 @whitelist_only
 async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
@@ -61,20 +51,11 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         lat = data.get('lat')
         lon = data.get('lon')
         response = send_photo_to_api(user_id, file_bytes, lat, lon)
-        if response['status']:
-            print(file_bytes)
-            post_ticket(user_id=user_id,
-                        lat=lat,
-                        lon=lon,
-                        photo_bytes=file_bytes,
-                        notFake=None)
 
-            await message.answer('Запрос на очистку создан! '
+        await message.answer('Запрос на очистку создан! '
                                  'Благодарим, что заботитесь о чистоте нашего города!\n '
                                  'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
-        else:
-            await message.answer('К сожалению, система не распознала граффити или рекламу здесь =(\n'
-                             'Вы можете попытаться отправить фото ещё раз или отправить другой объект', reply_markup=get_photo_keyboard())
+
         # После отправки фото возвращаемся в MAIN
         await state.set_state(MainMenuStates.MAIN)
         await state.update_data(lat=None, lon=None)
@@ -96,19 +77,6 @@ async def handle_location(message: types.Message, state: FSMContext):
     except Exception as e:
         await message.answer(f'Ошибка: {e}')
         assert False, f'Ошибка в handle_location: {e}'
-
-@dp.message(F.text & (F.text != 'Прислать фото'))
-@whitelist_only
-async def handle_text(message: types.Message, state: FSMContext):
-    try:
-        current_state = await state.get_state()
-        if current_state == MainMenuStates.WAIT_PHOTO.state:
-            await message.answer('Пришлите изображение.')
-        else:
-            await message.answer('Пожалуйста, выберите действие из меню.')
-    except Exception as e:
-        await message.answer(f'Ошибка: {e}')
-        assert False, f'Ошибка в handle_text: {e}'
 
 @dp.message(F.content_type.in_(['document', 'audio', 'video', 'voice', 'sticker']))
 @whitelist_only
