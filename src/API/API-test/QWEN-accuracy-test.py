@@ -29,8 +29,10 @@ def get_pred(img):
 def prepare_response(response):
     if response == 'соответствует':
         return 1
-    else:
+    elif response == 'не соответствует':
         return 0
+    else:
+        return 404
 
 def get_metrics(path_to_imgs):
     os.chdir(root_path)

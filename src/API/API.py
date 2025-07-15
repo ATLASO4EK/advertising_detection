@@ -31,7 +31,7 @@ def ask_model_promt_image(model, model_name, prompt, base64_image):
     history = History([message])
     return ask_model(model, model_name, history)
 
-API_KEY = "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"
+API_KEY = "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"
 prompt = "Проанализируй это изображение на соответствие дизайн-коду города"
 with open('start_prompt.txt', 'r') as f:
     start_text = f.read()
