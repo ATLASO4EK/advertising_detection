@@ -112,7 +112,10 @@ prompt = "Проанализируй это изображение на соот
 with open('src/API/start_prompt.txt', 'r') as f:
     start_text = f.read()
 model = QWEN(API_KEY,
-    History([Message({"role": "system", "content": f"Ты - агент для определения соответствия рекламы дизайн-коду города. (Правилам и нормам). Тебе на вход подается фото объекта. На выходе - json, с ключами:\n'final answer': 'соответствует'/'не соответствует' - твой итоговый ответ\n'pre[i]': 'your_text' - обоснование для i-го пунка из дизайн кода\nВажно, что твой ответ должен быть только в формате json!\nПравила:\n{start_text}"})])
+    History([
+        Message({"role": "system", "content": f"Ты - агент для определения соответствия рекламы дизайн-коду города. (Правилам и нормам). Тебе на вход подается фото объекта. На выходе - json, с ключами:\n'final answer': 'соответствует'/'не соответствует' - твой итоговый ответ\n'pre[i]': 'your_text' - обоснование для i-го пунка из дизайн кода\nВажно, что твой ответ должен быть только в формате json!\nПравила:\n{start_text}\nПример "}),
+        Message({'role': ''})
+    ])
 )
 
 
@@ -180,7 +183,7 @@ def get_pred():
     global model, prompt
     model_ans = ask_model(model, prompt, base64_image)
 
-    return jsonify({'response':model_ans}), 200
+    return model_ans, 200
 
 # Сравниваем с объектами в бд
 @app.route('/get_object', methods=['GET'])
@@ -341,16 +344,6 @@ async def ticket():
                       user_photo=img_str)
 
     return jsonify({'status':'Ok.'}), 200
-
-
-@app.route('/get_pred_qwen', methods=['GET'])
-async def get_pred_qwen():
-    try:
-        file = request.files['image']
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-    return jsonify({'response':1}), 200
 
 app.run(debug=True)
 
