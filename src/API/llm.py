@@ -1,8 +1,5 @@
 import requests
 import json
-
-from flask import jsonify
-
 from history import History, Message, merge_histories
 
 class LLM:
@@ -10,7 +7,7 @@ class LLM:
         raise NotImplementedError
 
 import os
-from database import parse_history_from_json_learning_format
+from database_json import parse_history_from_json_learning_format
 
 class QwenLLM(LLM):
     def __init__(self, api_key: str, model: str = "qwen/qwen-vl-plus"):
@@ -19,7 +16,7 @@ class QwenLLM(LLM):
         self.model = model
 
     def ask(self, history: History):
-        messages = history.get_messages_json()
+        messages = history.to_dict()
         response = requests.post(
             url=self.api_url,
             headers={
@@ -28,7 +25,7 @@ class QwenLLM(LLM):
                 "HTTP-Referer": "https://your-app.com",
                 "X-Title": "Design Code Checker"
             },
-            data=jsonify({
+            data=json.dumps({
                 "model": self.model,
                 "messages": messages,
                 "max_tokens": 4000

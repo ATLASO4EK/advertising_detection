@@ -33,18 +33,9 @@ def ask_model_promt_image(model, model_name, prompt, base64_image):
 
 API_KEY = "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"
 prompt = "Проанализируй это изображение на соответствие дизайн-коду города"
-with open('src/API/start_prompt.txt', 'r') as f:
+with open('start_prompt.txt', 'r') as f:
     start_text = f.read()
-model = QwenLLM(API_KEY,
-    [
-        Message({"role": "system",
-                 "content": f"Ты - агент для определения соответствия рекламы дизайн-коду города. (Правилам и нормам). Тебе на вход подается фото объекта. "
-                            f"На выходе - json, с ключами:\n'final answer': 'соответствует'/'не соответствует' - твой итоговый ответ\n"
-                            f"'pre[i]': 'your_text' - обоснование для i-го пунка из дизайн кода\nВажно, что твой ответ должен быть только в формате json!"
-                            f"\nПравила:\n{start_text}\n"
-                            "Пример твоего выхода:\n{'final answer': 'соответствует'}\n"
-                            f"Выход должен быть исключительно в таком формате, может содержать больше параметров, но параметр"
-                            f"'final answer' должен присутствовать в любом случае"})])
+model = QwenLLM(API_KEY)
 
 
 
@@ -103,6 +94,7 @@ def find_closest_object(db_session, lat: float, lon: float):
 
     return closest
 
+
 @app.route('/get_pred_qwen', methods=['GET'])
 def get_pred():
     try:
@@ -112,7 +104,7 @@ def get_pred():
     global model, prompt
     model_ans = ask_model_promt_image(model, 'test', prompt, base64_image)
 
-    return jsonify({'response':model_ans}), 200
+    return model_ans, 200
 
 # Сравниваем с объектами в бд
 @app.route('/get_object', methods=['GET'])
