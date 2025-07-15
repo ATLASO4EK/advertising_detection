@@ -4,6 +4,7 @@ import os
 import base64
 
 root_path = '/Users/atlas/Desktop/Pythonic-Shit/advertising_detection/src/API/API-test'
+img_path = root_path+'/images'
 
 os.chdir(root_path)
 
@@ -32,16 +33,18 @@ def prepare_response(response):
         return 0
 
 def get_metrics(path_to_imgs):
+    os.chdir(root_path)
+    correct_list = list(pd.read_excel('correct.xlsx').iloc[:,1])
     os.chdir(path_to_imgs)
     img_list = os.listdir()
     data = []
-    correct_list = list(pd.read_excel('correct.xlsx').iloc[1])
+
     for i in range(len(img_list)):
-        pred = prepare_response(get_pred(img_list[i]))
-        data.append([img_list[i], pred, correct_list[i]])
+        pred = prepare_response(get_pred(f'img{i}.jpg'))
+        data.append([f'img{i}.jpg', pred, correct_list[i]])
     df = pd.DataFrame(columns=['img', 'pred', 'corr'], data=data)
     os.chdir(root_path+'/metrics')
     path_len = len(os.listdir())
     df.to_excel(f'metrics{path_len}.xlsx', index=False)
 
-print('a')
+get_metrics(img_path)
