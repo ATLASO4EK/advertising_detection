@@ -1,5 +1,12 @@
 import json
-from history import *      
+from history import *  
+
+
+
+
+
+# JSON
+
 def parse_JSON(path: str):
     result = {}
     with open(path, 'r', encoding='utf-8') as jsfile:
@@ -59,6 +66,3 @@ def parse_history_from_json_learning_format(JSON_LEARNING_PATH: str) -> History:
                 base64_image = None
         messages.append(Message(role=role, text=text, base64_image=base64_image))
     return History(messages)
-
-
-

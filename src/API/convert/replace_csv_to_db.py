@@ -2,7 +2,7 @@ import csv
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from db import CityObject, Base, Session  # Импортируйте ваши модели и Base из файла с БД
+from src.API.database_sql import CityObject, Base, Session  # Импортируйте ваши модели и Base из файла с БД
 
 
 csv.field_size_limit(1000000)

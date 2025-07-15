@@ -1,47 +1,13 @@
-from flask import Flask, request, jsonify
-from ultralytics import YOLO
-from PIL import Image
 from torch import nn
 from torchvision import transforms as tr
 from torchvision.models import vit_h_14
 from math import sqrt
-from datetime import datetime
 
-import asyncio
-import base64
-import io
-import numpy as np
 import torch
 import torchvision
-import requests
-import json
 
-from llm import ask_model, QwenLLM, History, Message
+from llm import ask_model, History, Message
 from database_sql import Session, CityObject
-from ticket import add_ticket_object
-from config import API_KEY
-
-
-
-
-with open('src/API/start_prompt.txt', 'r') as f:
-    start_text = f.read()
-
-app = Flask(__name__)
-model = QwenLLM(API_KEY)
-prompt = "Проанализируй это изображение на соответствие дизайн-коду города"
-
-"""
-History([
-        Message({"role": "system",
-                 "content": f"Ты - агент для определения соответствия рекламы дизайн-коду города. (Правилам и нормам). Тебе на вход подается фото объекта. "
-                            f"На выходе - json, с ключами:\n'final answer': 'соответствует'/'не соответствует' - твой итоговый ответ\n"
-                            f"'pre[i]': 'your_text' - обоснование для i-го пунка из дизайн кода\nВажно, что твой ответ должен быть только в формате json!"
-                            f"\nПравила:\n{start_text}\n"
-                            "Пример твоего выхода:\n{'final answer': 'соответствует'}\n"
-                            f"Выход должен быть исключительно в таком формате, может содержать больше параметров, но параметр"
-                            f"'final answer' должен присутствовать в любом случае"})])
-"""
 
 def ask_model_promt_image(model, model_name, prompt, base64_image):
     message = Message('user', prompt, base64_image)
@@ -74,7 +40,6 @@ def process_test_image(img, device):
 
     return img
 
-
 # Ищем ближайший объект по евклидову расстоянию
 def find_closest_object(db_session, lat: float, lon: float):
     """
@@ -101,3 +66,8 @@ def find_closest_object(db_session, lat: float, lon: float):
             closest = obj
 
     return closest
+
+def get_start_text():
+    with open('src/API/start_prompt.txt', 'r') as f:
+        start_text = f.read()
+    return start_text

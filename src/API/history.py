@@ -58,7 +58,7 @@ class History:
     def add(self, message: Message):
         self.messages.append(message)
 
-    def get_messages_json(self):
+    def to_dict(self):
         return [message.get_dict() for message in self.messages]
     
 def merge_histories(history1: History, history2: History):
