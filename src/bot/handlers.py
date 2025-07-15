@@ -51,8 +51,9 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         lat = data.get('lat')
         lon = data.get('lon')
         response = send_photo_to_api(user_id, file_bytes, lat, lon)
+        post_ticket(user_id, file_bytes, lat, lon)
 
-        await message.answer('Запрос на очистку создан! '
+        await message.answer('Запрос на очистку создан! ✅'
                                  'Благодарим, что заботитесь о чистоте нашего города!\n '
                                  'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
 

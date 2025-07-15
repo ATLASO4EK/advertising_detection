@@ -14,7 +14,7 @@ def send_photo_to_api(user_id, photo_bytes, lat=None, lon=None):
         print(f"Ошибка при отправке на API: {e}")
         return None
 
-def post_ticket(user_id, photo_bytes, lat, lon, notFake):
+def post_ticket(user_id, photo_bytes, lat, lon):
     """
     Создает POST-запрос в API для сохранения тикета в БД
     """
@@ -26,7 +26,6 @@ def post_ticket(user_id, photo_bytes, lat, lon, notFake):
     params['lon'] = str(lon)
     params['user_id'] = int(user_id)
     params['user_time'] = datetime.now()
-    params['notFake'] = bool(notFake)
 
     try:
         response = requests.post(url, files=files, params=params, timeout=30)
