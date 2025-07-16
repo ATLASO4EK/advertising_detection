@@ -1,5 +1,5 @@
 # Городовёнок
-![](https://img.shields.io/badge/Made_by-Рекламщики-green) ![](https://img.shields.io/badge/Forum-БММ2025-green) ![](https://img.shields.io/badge/Sponsored_by-НКЭиВТ-blue) ![](https://img.shields.io/badge/Employeer-SITRONICS-purple) 
+![](https://img.shields.io/badge/Made_by-Рекламщики-yellow) ![](https://img.shields.io/badge/Forum-БММ2025-green) ![](https://img.shields.io/badge/Sponsored_by-НКЭиВТ-blue) ![](https://img.shields.io/badge/Employeer-SITRONICS-purple) 
 > **Проект по автоматической детекции и классификации несанкционированной наружной рекламы, граффити или вывесок, не соответсвующих дизайн-коду города с использованием компьютерного зрения.**
 
 ## О проекте
