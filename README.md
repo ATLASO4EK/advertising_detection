@@ -34,13 +34,13 @@
 
 ## О нас
 Мы команда энтузиастов и специалистов в области искусственного интеллекта и разработки ПО:
-| Имя | Роль | Задачи |
+| Имя | GitHub | Роль | Задачи |
 |-----|------|-------------------------|
-| Дьячкова Алёна | Project Manager, Developer | Оформление проекта, SQL-разработка |
-| Христофорова Алёна | Data Scientist, Developer | Docker, Data-аналитика, SQL-разработка |
-| Кравченко Алексей | sr. Developer | Обучение моделей, Telegram-боты, Flask API |
-| Бикбаев Никита | sr. Developer | Telegram-боты, Flask API |
-| Жеребцов Никита | Prompt Engineer, jr. Developer | Тестирование моделей, Prompt-Engineering |
+| Дьячкова Алёна | [snow-faller](https://github.com/snow-faller "Дьячкова Алёна") | Project Manager, Developer | Оформление проекта, SQL-разработка |
+| Христофорова Алёна | [Hao_pc](https://github.com/hao-pc "Христофорова Алёна") | Data Scientist, Developer | Docker, Data-аналитика, SQL-разработка |
+| Кравченко Алексей | [atlaso4ek](https://github.com/ATLASO4EK "Кравченко Алексей") | sr. Developer | Обучение моделей, Telegram-боты, Flask API |
+| Бикбаев Никита | [NiktWK](https://github.com/NiktWK "Бикбаев Никита") | sr. Developer | Telegram-боты, Flask API |
+| Жеребцов Никита | [Vilk01](https://github.com/Vilk01 "Жеребцов Никита") | jr. Developer | Тестирование моделей |
 
 
 ## Документация пользователя
