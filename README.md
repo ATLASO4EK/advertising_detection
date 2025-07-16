@@ -1,4 +1,4 @@
-# Detection of Unauthorized Advertising
+# Детекция рекламы
 ![](https://img.shields.io/badge/Made_by-Рекламщики-green) ![](https://img.shields.io/badge/Sponsored_by-НКЭиВТ-blue) ![](https://img.shields.io/badge/Employeer-sitronics-purple) 
 > **Проект по автоматической детекции и классификации несанкционированной наружной рекламы, граффити или вывесок, не соответсвующих дизайн-коду города с использованием компьютерного зрения.**
 
