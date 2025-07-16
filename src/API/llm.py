@@ -1,13 +1,12 @@
 import requests
 import json
 from history import History, Message, merge_histories
+from database_json import parse_history_from_json_learning_format
+from config import LEARNING_HISTORY_DATA_PATH, QWEN_API_KEY, LERNING_HISTORY_NAME_TEMPLATE
 
 class LLM:
     def ask(self, history: History):
         raise NotImplementedError
-
-import os
-from database_json import parse_history_from_json_learning_format
 
 class QwenLLM(LLM):
     def __init__(self, api_key: str, model: str = "qwen/qwen-vl-plus"):
@@ -39,12 +38,19 @@ class QwenLLM(LLM):
             return None
 
 def ask_model(model: LLM, model_name: str, history: History):
-    back_hist = parse_history_from_json_learning_format(f'data/learning/learning_data_{model_name}.json')
+    back_hist = parse_history_from_json_learning_format(f'{LEARNING_HISTORY_DATA_PATH}/{LERNING_HISTORY_NAME_TEMPLATE.format(name = model_name)}')
     return model.ask(merge_histories(back_hist, history))
 
+def ask_model_promt_image(model, model_name, prompt, base64_image):
+    message = Message('user', prompt, base64_image)
+    history = History([message])
+    return ask_model(model, model_name, history)
 
-if __name__ == '__main__':
-    QWEN_API_KEY = "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"
+
+def test():
     history = History([Message('user', 'Привет, братан')])
     model = QwenLLM(QWEN_API_KEY)
     print(ask_model(model, 'test', history))
+
+if __name__ == '__main__':
+    test()

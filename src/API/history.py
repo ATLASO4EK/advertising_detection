@@ -60,6 +60,7 @@ class History:
 
     def to_dict(self):
         return [message.get_dict() for message in self.messages]
-    
+
+
 def merge_histories(history1: History, history2: History):
     return History(history1.messages + history2.messages)

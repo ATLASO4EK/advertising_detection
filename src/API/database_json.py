@@ -1,12 +1,6 @@
 import json
 from history import *  
 
-
-
-
-
-# JSON
-
 def parse_JSON(path: str):
     result = {}
     with open(path, 'r', encoding='utf-8') as jsfile:

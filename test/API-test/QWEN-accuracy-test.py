@@ -3,7 +3,7 @@ import requests
 import os
 import base64
 
-root_path = '/Users/atlas/Desktop/Pythonic-Shit/advertising_detection/src/API/API-test'
+root_path = '/home/niktwork/Документы/IT_projects/advertising_detection/test/API-test'
 img_path = root_path+'/images'
 
 os.chdir(root_path)

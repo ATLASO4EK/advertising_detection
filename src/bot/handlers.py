@@ -1,13 +1,11 @@
-from aiogram import Bot, Dispatcher, types, F
+from aiogram import Bot, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from config import ALLOWED_USERS
-from datetime import datetime
 from states import *
 from keyboards import *
 from api import *
-from bot import *
-import base64
+from bot import bot, dp
 
 # Декоратор для проверки user_id в ALLOWED_USERS
 from functools import wraps
