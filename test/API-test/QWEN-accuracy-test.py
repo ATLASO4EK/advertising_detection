@@ -3,7 +3,7 @@ import requests
 import os
 import base64
 
-root_path = '/home/niktwork/Документы/IT_projects/advertising_detection/test/API-test'
+root_path = '/Users/atlas/Desktop/Pythonic-Shit/advertising_detection/test/API-test'
 img_path = root_path+'/images'
 
 os.chdir(root_path)
@@ -45,6 +45,7 @@ def get_metrics(path_to_imgs):
         pred = prepare_response(get_pred(f'img{i}.jpg'))
         data.append([f'img{i}.jpg', pred, correct_list[i]])
     df = pd.DataFrame(columns=['img', 'pred', 'corr'], data=data)
+    df.loc[len(df)] = [None, len(df[df['pred'] == df['corr']]) / len(df), None]
     os.chdir(root_path+'/metrics')
     path_len = len(os.listdir())
     df.to_excel(f'metrics{path_len}.xlsx', index=False)

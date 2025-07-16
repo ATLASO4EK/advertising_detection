@@ -38,7 +38,7 @@ class QwenLLM(LLM):
             return None
 
 def ask_model(model: LLM, model_name: str, history: History):
-    back_hist = parse_history_from_json_learning_format(f'{LEARNING_HISTORY_DATA_PATH}/{LERNING_HISTORY_NAME_TEMPLATE.format(name = model_name)}')
+    back_hist = parse_history_from_json_learning_format(f'{LEARNING_HISTORY_DATA_PATH}{LERNING_HISTORY_NAME_TEMPLATE.format(name = model_name)}')
     return model.ask(merge_histories(back_hist, history))
 
 def ask_model_promt_image(model, model_name, prompt, base64_image):
