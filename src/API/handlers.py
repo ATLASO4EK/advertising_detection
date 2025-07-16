@@ -26,7 +26,7 @@ def get_boxes():
     if 'image' not in request.files:
         return jsonify({'error': 'No image part in the request'}), 400
 
-    YOLO_model = YOLO('src/API/YOLO.pt')  # Загружаем дообученную YOLO для детекции граффити и рекламы
+    YOLO_model = YOLO('src/API/YOLO_trained.pt')  # Загружаем дообученную YOLO для детекции граффити и рекламы
 
     try:
         file = request.files['image']
