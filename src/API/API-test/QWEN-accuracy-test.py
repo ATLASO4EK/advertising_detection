@@ -27,9 +27,9 @@ def get_pred(img):
     return response
 
 def prepare_response(response):
-    if response == 'соответствует':
+    if response.content.decode('utf-8').lower() == 'соответствует':
         return 1
-    elif response == 'не соответствует':
+    elif response.content.decode('utf-8').lower() == 'не соответствует':
         return 0
     else:
         return 404
