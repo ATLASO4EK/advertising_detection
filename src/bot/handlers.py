@@ -13,10 +13,10 @@ def whitelist_only(handler):
     @wraps(handler)
     async def wrapper(message: types.Message, *args, **kwargs):
         user_id = message.from_user.id
-        if user_id not in ALLOWED_USERS:
+        """if user_id not in ALLOWED_USERS:
             print(user_id)
             await message.answer('Извините, вас нет в базе')
-            return
+            return"""
         return await handler(message, *args, **kwargs)
     return wrapper
 
@@ -51,8 +51,8 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         response = send_photo_to_api(user_id, file_bytes, lat, lon)
         post_ticket(user_id, file_bytes, lat, lon)
 
-        await message.answer('Запрос на очистку создан! ✅'
-                                 'Благодарим, что заботитесь о чистоте нашего города!\n '
+        await message.answer('✅Запрос на очистку создан!'
+                                 'Благодарим, что заботитесь о чистоте нашего города!\n'
                                  'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
 
         # После отправки фото возвращаемся в MAIN
