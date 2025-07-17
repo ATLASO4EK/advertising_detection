@@ -48,12 +48,26 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         data = await state.get_data()
         lat = data.get('lat')
         lon = data.get('lon')
-        response = send_photo_to_api(user_id, file_bytes, lat, lon)
-        post_ticket(user_id, file_bytes, lat, lon)
+        try:
+            response = get_graf_ad(user_id, file_bytes, lat, lon)
+            if response['response'] == {}:
+                response = send_photo_to_api(user_id, file_bytes, lat, lon)
+                if response.content.decode('utf-8') == 'не соответствует':
+                    post_ticket(user_id, file_bytes, lat, lon)
+                    await message.answer('✅Запрос на очистку создан!\n'
+                                     'Благодарим, что заботитесь о чистоте нашего города!\n'
+                                     'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
+                else:
+                    await message.answer(f'Запрос не был создан\nСистема не распознала несанкционированных вывесок')
+            else:
+                # Добавить бд для рекламы и граффити
+                await message.answer('✅Запрос на очистку создан!\n'
+                                     'Благодарим, что заботитесь о чистоте нашего города!\n'
+                                     'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
+        except Exception as e:
+            await message.answer(f'Запрос не был создан\nПопробуйте ещё раз позже\n\nОшибка на стороне сервера')
+            print(e)
 
-        await message.answer('✅Запрос на очистку создан!'
-                                 'Благодарим, что заботитесь о чистоте нашего города!\n'
-                                 'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
 
         # После отправки фото возвращаемся в MAIN
         await state.set_state(MainMenuStates.MAIN)
