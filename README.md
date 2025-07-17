@@ -45,7 +45,7 @@
 
 ## Документация пользователя
 
-![213](https://i.postimg.cc/kX6MsqS4/123131.jpg)
+[![123131.jpg](https://i.postimg.cc/kX6MsqS4/123131.jpg)](https://postimg.cc/Yh7wqcbK)
 
 # Инструкция к запуску Docker Compose (Запуск сервера с API и Telegem-ботом)
 
