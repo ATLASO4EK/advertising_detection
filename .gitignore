@@ -1,0 +1,7 @@
+src/API/config.py
+src/bot/config.py
+src/API/__pycache__
+src/bot/__pycache__
+README.md
+.venv/*
+.idea/*
