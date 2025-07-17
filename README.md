@@ -45,7 +45,7 @@
 
 ## Документация пользователя
 
-![213]([https://imgflip.com/i/a09z3v](https://postimg.cc/Yh7wqcbK))
+![213](https://i.postimg.cc/kX6MsqS4/123131.jpg)
 
 # Инструкция к запуску Docker Compose (Запуск сервера с API и Telegem-ботом)
 
