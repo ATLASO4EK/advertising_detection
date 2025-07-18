@@ -31,7 +31,6 @@ def ask_model_promt_image(model, model_name, prompt, base64_image):
     history = History([message])
     return ask_model(model, model_name, history)
 
-API_KEY = "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"
 prompt = "Соответствует ли данное фото предложанным правилам? Ответь только соответствует или не соответствует."
 with open('start_prompt.txt', 'r') as f:
     start_text = f.read()
