@@ -5,6 +5,7 @@ from ultralytics import YOLO
 from PIL import Image
 from ticket import add_ticket_object
 from datetime import datetime
+from io import BytesIO
 
 from llm import ask_model_promt_image
 from app import app, model
@@ -17,7 +18,7 @@ def get_pred():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     global model, PROMPT
-    model_ans = ask_model_promt_image(model, 'test', PROMPT, base64_image)
+    model_ans = ask_model_promt_image(model, 'v01-beta', PROMPT, base64_image)
     return model_ans, 200
 
 # Получение только class:bb
@@ -34,12 +35,16 @@ def get_boxes():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    results = YOLO_model.predict([img])
+    results = YOLO_model.predict([img], conf=0.7)
     response = {}
     for result in results:
         boxes = result.boxes  # Boxes object for bounding box outputs
         for i in range(len(boxes.cls)):
             response.update({int(boxes.cls[i].item()):list(boxes.xywh[i].tolist())})
+    
+    # image = Image.open(file)
+    # box_image = image.crop(boxes)
+    # box_image.save()
 
     if response != {}:
         return jsonify({'status':True,

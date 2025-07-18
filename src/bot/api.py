@@ -1,5 +1,15 @@
 from datetime import datetime
 import requests
+from PIL import Image
+import base64
+
+def format_qwen_answer(answer: str):
+    if answer.lower()[0:13] == 'соответствует':
+        return 'соответствует'
+    elif answer.lower()[0:11] == 'вывесок нет':
+        return 'соответствует'
+    elif answer.lower()[0:16] == 'не соответствует':
+        return 'не соответствует'
 
 def get_graf_ad(user_id, photo_bytes, lat=None, lon=None):
     # Отправка фото и координат на локальный сервер
@@ -10,12 +20,16 @@ def get_graf_ad(user_id, photo_bytes, lat=None, lon=None):
     return response.json()
 
 def send_photo_to_api(user_id, photo_bytes, lat=None, lon=None):
-    # Отправка фото и координат на локальный сервер
     url = 'http://127.0.0.1:5000/get_pred_qwen'
-    files = {'image':photo_bytes}
+    base64_image = base64.b64encode(photo_bytes).decode('utf-8')
+    
+    files = {
+        'image': ('image.txt', base64_image, 'text/plain')
+    }
+
     response = requests.get(url, files=files, timeout=60)
     print(f"API response for user {user_id}: {response.status_code} {response.text}")
-    return response.json()
+    return format_qwen_answer(response.text)
 
 def post_ticket(user_id, photo_bytes, lat, lon):
     """

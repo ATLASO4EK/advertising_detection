@@ -6,6 +6,17 @@ from states import *
 from keyboards import *
 from api import *
 from bot import bot, dp
+import aiohttp
+
+
+async def fetch_data(url, *args, **kwargs):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, *args, **kwargs) as response:
+            if response.status == 200:
+                return await response.json()
+            else:
+                return None
+            
 
 # Декоратор для проверки user_id в ALLOWED_USERS
 from functools import wraps
@@ -40,20 +51,26 @@ async def handle_photo(message: types.Message, bot: Bot, state: FSMContext):
         if current_state != MainMenuStates.WAIT_PHOTO.state:
             await message.answer('Сначала отправьте геолокацию.')
             return
+        
         user_id = message.from_user.id
         photo = message.photo[-1]
         file = await bot.get_file(photo.file_id)
         file_bytes = await bot.download_file(file.file_path)
+
         # Получаем координаты из state, если они были отправлены ранее
         data = await state.get_data()
         lat = data.get('lat')
         lon = data.get('lon')
+
+        raw_bytes = file_bytes.read()
+
         try:
-            response = get_graf_ad(user_id, file_bytes, lat, lon)
+            response = get_graf_ad(user_id, raw_bytes, lat, lon)
             if response['response'] == {}:
-                response = send_photo_to_api(user_id, file_bytes, lat, lon)
-                if response.content.decode('utf-8') == 'не соответствует':
-                    post_ticket(user_id, file_bytes, lat, lon)
+                file_bytes.seek(0)
+                model_answer = send_photo_to_api(user_id, raw_bytes, lat, lon)
+                if model_answer == 'не соответствует':
+                    #post_ticket(user_id, raw_bytes, lat, lon)
                     await message.answer('✅Запрос на очистку создан!\n'
                                      'Благодарим, что заботитесь о чистоте нашего города!\n'
                                      'Теперь Вы можете отправить еще один объект =)', reply_markup=get_photo_keyboard())
@@ -84,6 +101,7 @@ async def handle_location(message: types.Message, state: FSMContext):
         user_id = message.from_user.id
         lat = message.location.latitude
         lon = message.location.longitude
+
         # Сохраняем координаты в state
         await state.update_data(lat=lat, lon=lon)
         await message.answer(f'Геолокация получена! Широта: {lat}, Долгота: {lon}. Теперь отправьте фото.')

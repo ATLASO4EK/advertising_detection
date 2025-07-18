@@ -45,12 +45,3 @@ def ask_model_promt_image(model, model_name, prompt, base64_image):
     message = Message('user', prompt, base64_image)
     history = History([message])
     return ask_model(model, model_name, history)
-
-
-def test():
-    history = History([Message('user', 'Привет, братан')])
-    model = QwenLLM(QWEN_API_KEY)
-    print(ask_model(model, 'test', history))
-
-if __name__ == '__main__':
-    test()
