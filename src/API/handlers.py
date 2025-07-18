@@ -34,7 +34,7 @@ def get_boxes():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    results = YOLO_model.predict([img])
+    results = YOLO_model.predict([img], conf=0.7)
     response = {}
     for result in results:
         boxes = result.boxes  # Boxes object for bounding box outputs
